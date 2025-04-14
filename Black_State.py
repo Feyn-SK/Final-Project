@@ -5,4 +5,4 @@ state=4
 def action(self,i,j)
 
 if 1 in self.neighborhood
-  return 
+  return self.neighborhood(index(4)
