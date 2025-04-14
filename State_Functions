@@ -15,3 +15,40 @@ def light_blue_state_change(obj,locr,locc, parent_arr):
 
     else:
         pass
+
+\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+#from Black_State import *
+#from Red import *
+#from Light_Blue_State import *
+#from Dark_Blue_State import *
+from pyparsing import White
+
+from State_Class import *
+import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib import colors
+import random
+
+rows, cols = 50, 50
+np.set_printoptions(threshold=np.inf)
+data = [[0 for _ in range(cols)] for _ in range(rows)]
+
+num_data = np.empty((rows,cols))
+
+for i in range(rows):
+    for j in range(cols):
+        num_data[i][j] = random.randint(0,4)
+
+for i in range(len(data)):
+    for j in range(len(data[i])):
+        if data[i][j] == 0:
+            data[i][j] = State(num_data, i, j)
+        if num_data[i][j] == 1:
+            data[i][j] = Light_Blue(num_data, i, j)
+        if num_data[i][j] == 2:
+            data[i][j] = Dark_Blue(num_data, i, j)
+        if num_data[i][j] == 3:
+            data[i][j] = Red(num_data, i, j)
+        if num_data[i][j] == 4:
+            data[i][j] = Black(num_data, i, j)
+
