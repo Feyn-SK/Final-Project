@@ -65,3 +65,34 @@ plt.grid(which='both', color='k', linewidth=0.5)
 plt.xticks([])
 plt.yticks([])
 plt.show()
+
+
+def light_blue_state_change(obj,locr,locc, parent_arr):
+
+    bool, index_of = obj.action()
+    black_r, black_c = obj.neighborhood[1][index_of]
+    change = False
+
+
+    if bool:
+        parent_arr[locr][locc] = Dark_Blue(locr,locc, parent_arr)
+        parent_arr[black_r][black_c] = 0 #it becomes used up
+        change = True
+
+    else:
+        pass
+
+    return change
+
+ def red_state_change(obj,locr,locc, parent_arr):
+     bool, index_of = obj.action()
+     if bool:
+        parent_arr[locr][locc] = Dark_Blue(locr, locc, parent_arr)
+
+
+def dark_blue_state_change(obj,locr,locc, parent_arr):
+    bool, index_of = obj.action()
+    red_r, red_c = obj.neighborhood[1][index_of]
+    if bool == False:
+        red_state_change(obj,red_r,red_c,parent_arr)
+    else:
