@@ -4,79 +4,79 @@ import numpy as np
 def neighbor(array, i, j):
 
     if i == 0 and j == 0:
-        top_left = "999"
-        top_middle = "999"
-        top_right = "999"
+        top_left = 0
+        top_middle = 0
+        top_right = 0
 
-        middle_left = "999"
+        middle_left = 0
         middle_right = array[i + 1][j]
 
-        bottom_left = "999"
+        bottom_left = 0
         bottom_middle = array[i][j + 1]
         bottom_right = array[i + 1][j + 1]
 
 
-    elif j == 0:
-        top_left = "999"
+    elif i == 0 and j == len(array[0]) - 1:
+        top_left = 0
         top_middle = array[i][j - 1]
         top_right = array[i + 1][j - 1]
 
-        middle_left = "999"
+        middle_left = 0
         middle_right = array[i + 1][j]
 
-        bottom_left = "999"
-        bottom_middle = "999"
-        bottom_right = "999"
+        bottom_left = 0
+        bottom_middle = 0
+        bottom_right = 0
 
-    elif i == 0 and j == len(array) - 1:
-        top_left = "999"
-        top_middle = "999"
-        top_right = "999"
+    elif i == len(array) - 1 and j == 0:
+        top_left = 0
+        top_middle = 0
+        top_right = 0
 
         middle_left = array[i-1][j]
-        middle_right = "999"
+        middle_right = 0
 
         bottom_left = array[i - 1][j + 1]
         bottom_middle = array[i][j + 1]
-        bottom_right = "999"
+        bottom_right = 0
 
-    elif i == (len(array) - 1) and j ==(len(array) - 1):
+    elif i == (len(array) - 1) and j ==(len(array[0]) - 1):
         top_left = array[i - 1, j - 1]
         top_middle = array[i][j - 1]
-        top_right = "999"
+        top_right = 0
 
         middle_left = array[i-1][j]
-        middle_right = "999"
+        middle_right = 0
 
-        bottom_left = "999"
-        bottom_middle = "999"
-        bottom_right = "999"
+        bottom_left = 0
+        bottom_middle = 0
+        bottom_right = 0
 
     elif i == (len(array) - 1):
         top_left = array[i - 1, j - 1]
         top_middle = array[i][j - 1]
-        top_right = "999"
+        top_right = 0
 
         middle_left = array[i-1][j]
-        middle_right = "999"
+        middle_right = 0
 
         bottom_left = array[i - 1][j + 1]
         bottom_middle = array[i][j + 1]
-        bottom_right = "999"
+        bottom_right = 0
 
-    elif i == 999:
-        top_left = '999'
+    elif i == 0:
+        top_left = 0
         top_middle = array[i][j - 1]
         top_right = array[i + 1][j - 1]
 
-        middle_left = '999'
+        middle_left = 0
         middle_right = array[i + 1][j]
 
-        bottom_left = '999'
+        bottom_left = 0
         bottom_middle = array[i][j + 1]
         bottom_right = array[i + 1][j + 1]
 
-    elif j == (len(array) - 1):
+    elif j == (len(array[0]) - 1):
         top_left = array[i - 1, j - 1]
         top_middle = array[i][j - 1]
         top_right = array[i + 1][j - 1]
@@ -84,14 +84,14 @@ def neighbor(array, i, j):
         middle_left = array[i - 1][j]
         middle_right = array[i + 1][j]
 
-        bottom_left = "999"
-        bottom_middle = "999"
-        bottom_right = "999"
+        bottom_left = 0
+        bottom_middle = 0
+        bottom_right = 0
 
-    elif j == "999":
-        top_left = "999"
-        top_middle = "999"
-        top_right = "999"
+    elif j == 0:
+        top_left = 0
+        top_middle = 0
+        top_right = 0
 
         middle_left = array[i - 1][j]
         middle_right = array[i + 1][j]
@@ -122,7 +122,7 @@ def neighbor(array, i, j):
 def main():
     arr = np.arange(81).reshape(9,9)
     print(arr)
-    print(neighbor(arr,0,0)) # change to test
+    print(neighbor(arr,7,7)) # change to test
 
 if __name__ == '__main__':
     main()
