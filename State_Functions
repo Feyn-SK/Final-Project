@@ -1,1 +1,17 @@
 #contains functions for stat operations
+
+import Light_Blue_State
+from Dark_Blue_State import Dark_Blue
+
+def light_blue_state_change(obj,locr,locc, parent_arr):
+
+    bool, index_of = obj.action()
+    black_r, black_c = obj.neighborhood[1][index_of]
+
+
+    if bool:
+        parent_arr[locr][locc] = Dark_Blue(locr,locc, parent_arr)
+        parent_arr[black_r][black_c] = 0
+
+    else:
+        pass
