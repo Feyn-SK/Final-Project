@@ -3,3 +3,6 @@
 state=4
 
 def action(self,i,j)
+
+if 1 in self.neighborhood
+  return 
