@@ -52,3 +52,16 @@ for i in range(len(data)):
         if num_data[i][j] == 4:
             data[i][j] = Black(num_data, i, j)
 
+cmap_to_use = colors.ListedColormap(['white',(0.8, 0.8, 1),'blue', 'red','black'])
+
+
+for i in range(rows):
+    for j in range(cols):
+        num_data[i,j] = data[i][j].getstate()
+
+plt.figure(figsize=(7,6))
+plt.imshow(num_data,cmap = cmap_to_use)
+plt.grid(which='both', color='k', linewidth=0.5)
+plt.xticks([])
+plt.yticks([])
+plt.show()
