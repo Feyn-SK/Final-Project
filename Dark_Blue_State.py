@@ -1,7 +1,7 @@
 'States: 0:white, 1:light_blue, 2: Dark_blue, 3: red, 4:black'
-from state_class import state
+
 import time
-import neighbor
+from state_class import state
 
 class Dark_Blue(state):
     state = 2
@@ -19,8 +19,15 @@ time.sleep(1)
 #if there are not any dark blue states nearby, move the dark blue state to a surrounding red state
 def action(self, i, j):
     if self.state in self.neighbor:
-    else:
-        self.state = red
+        return True
+
+    elif 3 in self.neighborhood:
+        index_of = self.neighbhorhood.index(3)
+    return False, index_of
+
+
+
+#This chain continues until another dark blue state is met in its neighborhood
 
 
 #This chain continues until another dark blue state is met in its neighborhood
