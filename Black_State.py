@@ -2,7 +2,10 @@
 
 state=4
 
-def action(self,i,j)
+def action(self, i, j):
+    if self.state in self.neighbor:
+        return True
 
-if 1 in self.neighborhood
-  return self.neighborhood.index(1)
+    elif 1 in self.neighborhood:
+        index_of = self.neighbhorhood.index(1)
+    return False, index_of
