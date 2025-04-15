@@ -1,98 +1,169 @@
-#contains functions for stat operations
-
-import Light_Blue_State
-from Dark_Blue_State import Dark_Blue
-
-def light_blue_state_change(obj,locr,locc, parent_arr):
-
-    bool, index_of = obj.action()
-    black_r, black_c = obj.neighborhood[1][index_of]
-
-
-    if bool:
-        parent_arr[locr][locc] = Dark_Blue(locr,locc, parent_arr)
-        parent_arr[black_r][black_c] = 0
-
-    else:
-        pass
-
-\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-#from Black_State import *
-#from Red import *
-#from Light_Blue_State import *
-#from Dark_Blue_State import *
-from pyparsing import White
+from Black_State import *
+from Red import *
+from Light_Blue_State import *
+from Dark_Blue_State import *
 
 from State_Class import *
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import colors
 import random
+import imageio
 
 rows, cols = 50, 50
 np.set_printoptions(threshold=np.inf)
 data = [[0 for _ in range(cols)] for _ in range(rows)]
 
 num_data = np.empty((rows,cols))
+dark_blue_counter = {}
+initial_black_counter = {}
+black_lifetime = {}
+cooldown_counter = {}
 
+normal = False
+drug_spread = False
 for i in range(rows):
     for j in range(cols):
-        num_data[i][j] = random.randint(0,4)
+        num_data[i][j] = random.randint(0,3)
+num_data[0][0]= 4
+for k in range(100):
+    for i in range(len(data)):
+        for j in range(len(data[i])):
+            if num_data[i][j] == 0:
+                data[i][j] = State(i,j,num_data)
+            if num_data[i][j] == 1:
+                data[i][j] = Light_Blue(i,j,num_data)
+            if num_data[i][j] == 4:
+                data[i][j] = Dark_Blue(i,j,num_data)
+            if num_data[i][j] == 3:
+                data[i][j] = Red(i,j,num_data)
+            if num_data[i][j] == 2:
+                data[i][j] = Black(i,j,num_data)
 
-for i in range(len(data)):
-    for j in range(len(data[i])):
-        if data[i][j] == 0:
-            data[i][j] = State(num_data, i, j)
-        if num_data[i][j] == 1:
-            data[i][j] = Light_Blue(num_data, i, j)
-        if num_data[i][j] == 2:
-            data[i][j] = Dark_Blue(num_data, i, j)
-        if num_data[i][j] == 3:
-            data[i][j] = Red(num_data, i, j)
-        if num_data[i][j] == 4:
-            data[i][j] = Black(num_data, i, j)
-
-cmap_to_use = colors.ListedColormap(['white',(0.8, 0.8, 1),'blue', 'red','black'])
-
-
-for i in range(rows):
-    for j in range(cols):
-        num_data[i,j] = data[i][j].getstate()
-
-plt.figure(figsize=(7,6))
-plt.imshow(num_data,cmap = cmap_to_use)
-plt.grid(which='both', color='k', linewidth=0.5)
-plt.xticks([])
-plt.yticks([])
-plt.show()
+    cmap_to_use = colors.ListedColormap(['white',(0.7, 0.8, 1),'black', 'red','blue'])
 
 
-def light_blue_state_change(obj,locr,locc, parent_arr):
+    for i in range(rows):
+        for j in range(cols):
+            num_data[i,j] = data[i][j].getstate()
 
-    bool, index_of = obj.action()
-    black_r, black_c = obj.neighborhood[1][index_of]
-    change = False
+    plt.figure(figsize=(7, 6))
+    plt.imshow(num_data, cmap=cmap_to_use)
+    plt.grid(which='both', color='k', linewidth=0.5)
+    plt.xticks([])
+    plt.yticks([])
+
+    if(k%3 == 0):
+        for i in range(rows):
+            for j in range(cols):
+                if num_data[i][j] == 1:
+                    if (i, j) not in dark_blue_counter:
+                        dark_blue_counter[(i, j)] = 1
+                    else:
+                        dark_blue_counter[(i, j)] += 1
+                    result = data[i][j].update_light_blue(dark_blue_counter[(i, j)])
+
+                    if result == 0:
+                        num_data[i][j] = 1
+                    elif result == 1:
+                        num_data[i][j] = 4
+                        if 1 in data[i][j].neighborhood:
+                            for dx in [-1, 0, 1]:
+                                for dy in [-1, 0, 1]:
+                                    ni, nj = i + dx, j + dy
+                                    if (dx == 0 and dy == 0) or not (0 <= ni < rows and 0 <= nj < cols):
+                                        continue
+                                    if num_data[ni][nj] == 2:
+                                        num_data[ni][nj] = 0
+                                        if (i, j) not in initial_black_counter:
+                                            initial_black_counter[(i, j)] = 1
+                                        result = data[i][j].update_light_blue(dark_blue_counter[(i, j)])
+                                        break
+                                else:
+                                    continue
+                                break
+                    elif result == 2:
+                        num_data[i][j] = 0
+                        if (i, j) in dark_blue_counter:
+                            del dark_blue_counter[(i, j)]
+
+    if(k%3 != 0):
+        for i in range(rows):
+            for j in range(cols):
+                if isinstance(data[i][j], Dark_Blue):
+                    if data[i][j].update_dark_blue() and (i, j) not in cooldown_counter:
+                        for dx in [-1, 0, 1]:
+                            for dy in [-1, 0, 1]:
+                                ni, nj = i + dx, j + dy
+                                if (dx == 0 and dy == 0) or not (0 <= ni < rows and 0 <= nj < cols):
+                                    continue
+                                if num_data[ni][nj] == 3:
+                                    num_data[ni][nj] = 4
+                                    if (i,j) in dark_blue_counter:
+                                        num_data[i][j] = 1
+                                    else:
+                                        num_data[i][j] = 3
+                                    break
+                            else:
+                                continue
+                            break
+                        cooldown_counter[(i, j)] = 3
+
+    if((k-2)%10 == 0 and normal == True):
+        for i in range(rows):
+            for j in range(cols):
+                if (i,j) in initial_black_counter:
+                    num_data[i][j] = 2
+                    data[i][j] = Black(i, j, num_data)
+    if((k-2)%10 == 0 and normal == False):
+        for i in range(rows):
+            for j in range(cols):
+                if (i,j) in initial_black_counter and 999 in data[i][j].neighborhood:
+                    num_data[i][j] = 2
+                    data[i][j] = Black(i, j, num_data)
+                    drug_spread = True
+    if(drug_spread == True):
+        for i in range(rows):
+            for j in range(cols):
+                if isinstance(data[i][j], Black):
+                    for dx in [-1, 0, 1]:
+                        for dy in [-1, 0, 1]:
+                            ni, nj = i + dx, j + dy
+                            if (dx == 0 and dy == 0) or not (0 <= ni < rows and 0 <= nj < cols):
+                                continue
+                            if num_data[ni][nj] == 0:
+                                num_data[ni][nj] = 2
+                                break
+                        else:
+                            continue
+                        break
+    if(k%13 == 0):
+        drug_spread = False
+    for i in range(rows):
+        for j in range(cols):
+            if num_data[i][j] == 2:
+                if (i, j) not in black_lifetime:
+                    black_lifetime[(i, j)] = 5  # or some configurable decay time
+                else:
+                    black_lifetime[(i, j)] -= 1
+                    if black_lifetime[(i, j)] <= 0:
+                        num_data[i][j] = 0
+                        del black_lifetime[(i, j)]
+    for (i, j) in list(cooldown_counter.keys()):
+        cooldown_counter[(i, j)] -= 1
+        if cooldown_counter[(i, j)] <= 0:
+            del cooldown_counter[(i, j)]
+            num_data[i][j] = 1
+
+    plt.savefig('figure_' + str(k) + '.jpg', bbox_inches='tight', pad_inches=0.02)
+    plt.close()
+
+images = []
+for fileNumber in range(0, k):
+    filename = 'figure_' + str(fileNumber) + '.jpg'
+    images.append(imageio.v2.imread(filename))
+imageio.mimsave('movie2.gif', images, fps=2)
+print('GIF saved')
 
 
-    if bool:
-        parent_arr[locr][locc] = Dark_Blue(locr,locc, parent_arr)
-        parent_arr[black_r][black_c] = 0 #it becomes used up
-        change = True
 
-    else:
-        pass
-
-    return change
-
- def red_state_change(obj,locr,locc, parent_arr):
-     bool, index_of = obj.action()
-     if bool:
-        parent_arr[locr][locc] = Dark_Blue(locr, locc, parent_arr)
-
-
-def dark_blue_state_change(obj,locr,locc, parent_arr):
-    bool, index_of = obj.action()
-    red_r, red_c = obj.neighborhood[1][index_of]
-    if bool == False:
-        red_state_change(obj,red_r,red_c,parent_arr)
-    else:
