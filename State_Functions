@@ -10,23 +10,52 @@ from matplotlib import colors
 import random
 import imageio
 
-rows, cols = 50, 50
+rows, cols = 100, 100
 np.set_printoptions(threshold=np.inf)
 data = [[0 for _ in range(cols)] for _ in range(rows)]
 
-num_data = np.empty((rows,cols))
+num_data = np.zeros((rows, cols), dtype=int)
 dark_blue_counter = {}
 initial_black_counter = {}
 black_lifetime = {}
 cooldown_counter = {}
+revert_to_state = {}
 
 normal = False
 drug_spread = False
-for i in range(rows):
-    for j in range(cols):
-        num_data[i][j] = random.randint(0,3)
-num_data[0][0]= 4
-for k in range(100):
+
+for i in range(24,77):
+    num_data[:, i] = 3
+random_black1 = [random.randint(1,99) for i in range(75)]
+random_black2 = [random.randint(1,99) for i in range(75)]
+random_rows1 = [random.randint(1, 99) for _ in range(500)]
+random_rows2 = [random.randint(1, 99) for _ in range(500)]
+random_columns_left = [random.randint(24,28) for _ in range(500)]
+random_columns_right = [random.randint(72,76) for _ in range(500)]
+for i in range(500):
+    num_data[random_rows1[i]][random_columns_left[i]] = 1
+    num_data[random_rows2[i]][random_columns_right[i]] = 1
+#for i in range(75):
+    #num_data[random_black1[i]][23] = 2
+    #num_data[random_black2[i]][77] = 2
+for i in range(45,56):
+    num_data[:, i] = 1
+for i in range(47,54):
+    num_data[:, i] = 0
+for i in range(53,63):
+    for j in range(45,56):
+        num_data[i][j] = 1
+for i in range(55,61):
+    for j in range(45,56):
+        num_data[i][j] = 3
+
+
+
+
+
+num_data[0][0]= 2
+num_data[1][0]= 4
+for k in range(300):
     for i in range(len(data)):
         for j in range(len(data[i])):
             if num_data[i][j] == 0:
@@ -40,7 +69,7 @@ for k in range(100):
             if num_data[i][j] == 2:
                 data[i][j] = Black(i,j,num_data)
 
-    cmap_to_use = colors.ListedColormap(['white',(0.7, 0.8, 1),'black', 'red','blue'])
+    cmap_to_use = colors.ListedColormap(['white','#ADD8E6','black', '#FF0000','#00008B'])
 
 
     for i in range(rows):
@@ -57,35 +86,36 @@ for k in range(100):
         for i in range(rows):
             for j in range(cols):
                 if num_data[i][j] == 1:
-                    if (i, j) not in dark_blue_counter:
-                        dark_blue_counter[(i, j)] = 1
-                    else:
-                        dark_blue_counter[(i, j)] += 1
-                    result = data[i][j].update_light_blue(dark_blue_counter[(i, j)])
+                    if 2 in data[i][j].neighborhood:
+                        if (i, j) not in dark_blue_counter:
+                            dark_blue_counter[(i, j)] = 1
+                        else:
+                            dark_blue_counter[(i, j)] += 1
 
-                    if result == 0:
-                        num_data[i][j] = 1
-                    elif result == 1:
-                        num_data[i][j] = 4
-                        if 1 in data[i][j].neighborhood:
-                            for dx in [-1, 0, 1]:
-                                for dy in [-1, 0, 1]:
-                                    ni, nj = i + dx, j + dy
-                                    if (dx == 0 and dy == 0) or not (0 <= ni < rows and 0 <= nj < cols):
+                        result = data[i][j].update_light_blue(dark_blue_counter[(i, j)])
+
+                        if result == 0:
+                            num_data[i][j] = 1
+                        elif result == 1:
+                            num_data[i][j] = 4
+                            if 1 in data[i][j].neighborhood:
+                                for dx in [-1, 0, 1]:
+                                    for dy in [-1, 0, 1]:
+                                        ni, nj = i + dx, j + dy
+                                        if (dx == 0 and dy == 0) or not (0 <= ni < rows and 0 <= nj < cols):
+                                            continue
+                                        if num_data[ni][nj] == 2:
+                                            num_data[ni][nj] = 0
+                                            if (i, j) not in initial_black_counter:
+                                                initial_black_counter[(i, j)] = 1
+                                            break
+                                    else:
                                         continue
-                                    if num_data[ni][nj] == 2:
-                                        num_data[ni][nj] = 0
-                                        if (i, j) not in initial_black_counter:
-                                            initial_black_counter[(i, j)] = 1
-                                        result = data[i][j].update_light_blue(dark_blue_counter[(i, j)])
-                                        break
-                                else:
-                                    continue
-                                break
-                    elif result == 2:
-                        num_data[i][j] = 0
-                        if (i, j) in dark_blue_counter:
-                            del dark_blue_counter[(i, j)]
+                                    break
+                        elif result == 2:
+                            num_data[i][j] = 0
+                            if (i, j) in dark_blue_counter:
+                                del dark_blue_counter[(i, j)]
 
     if(k%3 != 0):
         for i in range(rows):
@@ -98,6 +128,7 @@ for k in range(100):
                                 if (dx == 0 and dy == 0) or not (0 <= ni < rows and 0 <= nj < cols):
                                     continue
                                 if num_data[ni][nj] == 3:
+                                    revert_to_state[(ni, nj)] = 3  # remember it was red
                                     num_data[ni][nj] = 4
                                     if (i,j) in dark_blue_counter:
                                         num_data[i][j] = 1
@@ -118,7 +149,7 @@ for k in range(100):
     if((k-2)%10 == 0 and normal == False):
         for i in range(rows):
             for j in range(cols):
-                if (i,j) in initial_black_counter and 999 in data[i][j].neighborhood:
+                if j == 0 or j == cols - 1:
                     num_data[i][j] = 2
                     data[i][j] = Black(i, j, num_data)
                     drug_spread = True
@@ -143,7 +174,7 @@ for k in range(100):
         for j in range(cols):
             if num_data[i][j] == 2:
                 if (i, j) not in black_lifetime:
-                    black_lifetime[(i, j)] = 5  # or some configurable decay time
+                    black_lifetime[(i, j)] = 7  # or some configurable decay time
                 else:
                     black_lifetime[(i, j)] -= 1
                     if black_lifetime[(i, j)] <= 0:
@@ -153,7 +184,11 @@ for k in range(100):
         cooldown_counter[(i, j)] -= 1
         if cooldown_counter[(i, j)] <= 0:
             del cooldown_counter[(i, j)]
-            num_data[i][j] = 1
+            if (i, j) in revert_to_state:
+                num_data[i][j] = revert_to_state[(i, j)]
+                del revert_to_state[(i, j)]
+            else:
+                num_data[i][j] = 1  # fallback
 
     plt.savefig('figure_' + str(k) + '.jpg', bbox_inches='tight', pad_inches=0.02)
     plt.close()
